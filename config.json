@@ -1,0 +1,20 @@
+{
+  "card_number": "8600 xxxx xxxx xxxx",
+  "card_holder": "ISM FAMILIYA",
+  "categories": [
+    {"name": "Qurilish maxsulotlari", "price": 50000, "topic_id": 18},
+    {"name": "Dillerlar", "price": 50000, "topic_id": 5},
+    {"name": "Distribyutorlar", "price": 50000, "topic_id": 31},
+    {"name": "Agentlar reklamasi", "price": 50000, "topic_id": 30},
+    {"name": "Vakansiyalar", "price": 30000, "topic_id": 20},
+    {"name": "Maishiy texnika", "price": 50000, "topic_id": 19},
+    {"name": "Mebel", "price": 50000, "topic_id": 17},
+    {"name": "Uy-ro'zg'or buyumlari", "price": 50000, "topic_id": 16},
+    {"name": "Kiyim-kechak", "price": 50000, "topic_id": 15},
+    {"name": "Parfyumeriya", "price": 50000, "topic_id": 14},
+    {"name": "Ishlab chiqaruvchilar", "price": 50000, "topic_id": 6},
+    {"name": "Ona va bola maxsulotlari", "price": 50000, "topic_id": 4},
+    {"name": "Textil", "price": 50000, "topic_id": 3},
+    {"name": "Oziq ovqat", "price": 50000, "topic_id": 2}
+  ]
+}
