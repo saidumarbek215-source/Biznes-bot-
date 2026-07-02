@@ -1,8 +1,12 @@
+import http from 'http'
 import TelegramBot from 'node-telegram-bot-api'
 import 'dotenv/config'
 import { readFileSync, writeFileSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
+
+const PORT = process.env.PORT || 3000
+http.createServer((req, res) => { res.writeHead(200); res.end('Bot is running!') }).listen(PORT)
 
 const __dir = dirname(fileURLToPath(import.meta.url))
 
