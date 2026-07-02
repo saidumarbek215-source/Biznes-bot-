@@ -134,6 +134,7 @@ function buildGroupPostText(p, cfg, botUsername) {
 
 bot.onText(/^\/start/, async (msg) => {
   if (msg.chat.type !== 'private') return
+  console.log(`[START] User: ${msg.from.id} @${msg.from.username} - ${msg.from.first_name}`)
   clearDialog(msg.from.id)
   await showStart(msg.chat.id)
 })
@@ -314,6 +315,7 @@ bot.on('message', async (msg) => {
   if (msg.photo) {
     const fileId = msg.photo[msg.photo.length - 1].file_id
     if (d.step === 'photo') {
+      console.log(`[STEP] User: ${userId} шаг: photo данные: [rasm yuborildi]`)
       d.adPhotoFileId = fileId
       d.step = 'conditions'
       setDialog(userId, d)
@@ -331,6 +333,7 @@ bot.on('message', async (msg) => {
 
   switch (d.step) {
     case 'name':
+      console.log(`[STEP] User: ${userId} шаг: name данные: ${text}`)
       d.name = text
       d.step = 'phone'
       setDialog(userId, d)
@@ -338,6 +341,7 @@ bot.on('message', async (msg) => {
       break
 
     case 'phone':
+      console.log(`[STEP] User: ${userId} шаг: phone данные: ${text}`)
       d.phone = text
       d.step  = 'description'
       setDialog(userId, d)
@@ -345,6 +349,7 @@ bot.on('message', async (msg) => {
       break
 
     case 'description':
+      console.log(`[STEP] User: ${userId} шаг: description данные: ${text}`)
       d.description = text
       d.step        = 'photo'
       setDialog(userId, d)
@@ -353,6 +358,7 @@ bot.on('message', async (msg) => {
 
     case 'photo':
       if (text === '/skip') {
+        console.log(`[STEP] User: ${userId} шаг: photo данные: /skip`)
         d.adPhotoFileId = null
         d.step = 'conditions'
         setDialog(userId, d)
@@ -363,10 +369,18 @@ bot.on('message', async (msg) => {
       break
 
     case 'conditions':
+      console.log(`[STEP] User: ${userId} шаг: conditions данные: ${text}`)
       d.conditions = text === '/skip' ? null : text
       d.step       = 'waiting_receipt'
       setDialog(userId, d)
-      await bot.sendMessage(msg.chat.id, buildSummaryText(d, loadConfig()), { parse_mode: 'HTML' })
+      await bot.sendMessage(msg.chat.id, buildSummaryText(d, loadConfig()), {
+        parse_mode:   'HTML',
+        reply_markup: {
+          inline_keyboard: [[
+            { text: '📋 Karta raqamini nusxalash', callback_data: 'copy_card' },
+          ]],
+        },
+      })
       break
 
     case 'waiting_receipt':
@@ -380,6 +394,8 @@ async function handleReceipt(msg, fileId, d) {
   const username = msg.from.username ?? null
   const cfg      = loadConfig()
   const p        = { ...d, userId, username, receiptFileId: fileId }
+
+  console.log(`[PAYMENT] User: ${userId} отправил чек`)
 
   const ownerMsg = await bot.sendPhoto(OWNER_ID, fileId, {
     caption:      buildOwnerText(p, cfg),
@@ -407,12 +423,21 @@ bot.on('callback_query', async (query) => {
   const msgId  = query.message?.message_id
   const data   = query.data || ''
 
+  // Copy card number (buyers)
+  if (data === 'copy_card') {
+    const cardNumber = loadConfig().card_number.replace(/\s/g, '')
+    await bot.answerCallbackQuery(query.id)
+    await bot.sendMessage(chatId, cardNumber)
+    return
+  }
+
   // Category selection
   if (data.startsWith('cat_')) {
     const idx = Number(data.slice(4))
     const cfg = loadConfig()
     if (idx < 0 || idx >= cfg.categories.length) { await bot.answerCallbackQuery(query.id); return }
 
+    console.log(`[CATEGORY] User: ${fromId} выбрал: ${cfg.categories[idx].name}`)
     clearDialog(fromId)
     setDialog(fromId, {
       step: 'name', categoryIdx: idx,
@@ -509,6 +534,7 @@ bot.on('callback_query', async (query) => {
     const p = pending.get(targetId)
     if (!p) { await bot.answerCallbackQuery(query.id, { text: "Ariza topilmadi (eskirgan)" }); return }
 
+    console.log(`[ADMIN] approve заявка от User: ${targetId}`)
     await bot.answerCallbackQuery(query.id, { text: '✅ Tasdiqlandi' })
     pending.delete(targetId)
     incStat('approved')
@@ -526,8 +552,9 @@ bot.on('callback_query', async (query) => {
       } else {
         await bot.sendMessage(GROUP_ID, postText, { parse_mode: 'HTML', ...threadOpt })
       }
+      console.log(`[PUBLISHED] Категория: ${cat.name} тема: ${cat.topic_id ?? 'нет'}`)
     } catch (err) {
-      console.error('Group post failed:', err.message)
+      console.error(`[ERROR] ${err.message}`)
     }
 
     // Update owner message
@@ -549,6 +576,7 @@ bot.on('callback_query', async (query) => {
     const p = pending.get(targetId)
     if (!p) { await bot.answerCallbackQuery(query.id, { text: "Ariza topilmadi" }); return }
 
+    console.log(`[ADMIN] reject заявка от User: ${targetId}`)
     await bot.answerCallbackQuery(query.id, { text: '❌ Rad etildi' })
     pending.delete(targetId)
     incStat('rejected')
@@ -572,7 +600,7 @@ bot.on('callback_query', async (query) => {
 
 // ─── Error handling ────────────────────────────────────────────────────────────
 
-bot.on('polling_error', (err) => console.error('[polling]', err.code, err.message))
-bot.on('error',         (err) => console.error('[error]',   err.message))
+bot.on('polling_error', (err) => console.error(`[ERROR] polling: ${err.code} ${err.message}`))
+bot.on('error',         (err) => console.error(`[ERROR] ${err.message}`))
 
 console.log('✅ Biznes Hamkorlar bot ishga tushdi')
