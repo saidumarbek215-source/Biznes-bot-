@@ -38,25 +38,23 @@ function incStat(key) {
   writeFileSync(STATS_PATH, JSON.stringify(s, null, 2), 'utf-8')
 }
 
-function loadUserAds() {
-  try { return JSON.parse(readFileSync(USER_ADS_PATH, 'utf-8')) }
-  catch { return {} }
-}
+function loadUserAds()     { try { return JSON.parse(readFileSync(USER_ADS_PATH, 'utf-8')) } catch { return {} } }
 function saveUserAds(data) { writeFileSync(USER_ADS_PATH, JSON.stringify(data, null, 2), 'utf-8') }
 function getUserAds(userId) { return loadUserAds()[String(userId)] ?? [] }
 
 function addUserAd(userId, adData) {
-  const all = loadUserAds()
-  const key = String(userId)
+  const all = loadUserAds(); const key = String(userId)
   if (!all[key]) all[key] = []
-  all[key].unshift(adData)
-  saveUserAds(all)
+  all[key].unshift(adData); saveUserAds(all)
 }
 function updateUserAdStatus(userId, adId, status) {
-  const all = loadUserAds()
-  const key = String(userId)
+  const all = loadUserAds(); const key = String(userId)
   const ad  = (all[key] ?? []).find(a => a.adId === adId)
   if (ad) { ad.status = status; saveUserAds(all) }
+}
+function removeUserAd(userId, adId) {
+  const all = loadUserAds(); const key = String(userId)
+  if (all[key]) { all[key] = all[key].filter(a => a.adId !== adId); saveUserAds(all) }
 }
 
 // ─── Translations ─────────────────────────────────────────────────────────────
@@ -65,35 +63,29 @@ const DIV = '――――――――――――――'
 
 const T = {
   uz: {
-    // Persistent bottom menu buttons (used as text detection)
     btnPost:     "📢 E'lon berish",
     btnMyAds:    "📋 Mening e'lonlarim",
     btnAccount:  "💰 Mening hisobim",
     btnSettings: "⚙️ Sozlamalar",
 
-    // Ad type selection
     adTypeTitle: `📢 <b>YANGI E'LON</b>\n${DIV}\n\nXabar turini tanlang:`,
     menuSell:    "📢 Sotaman",
     menuBuy:     "🛒 Sotib olaman",
     menuService: "🔧 Xizmat ko'rsataman",
 
-    // Category
-    chooseCategory: `📂 <b>Kategoriyani tanlang:</b>`,
+    chooseCategory: "📂 <b>Kategoriyani tanlang:</b>",
 
-    // Price confirm
     btnProceed:      "✅ Davom etish",
     btnCancelInline: "❌ Bekor qilish",
 
-    // Form steps
     askName:        "👤 <b>Kompaniyangiz yoki ismingiz?</b>",
     askPhone:       "📞 <b>Telefon raqamingizni yuboring:</b>",
     phoneBtn:       "📱 Telefon raqamimni yuborish",
     askDescription: "📝 <b>Mahsulot yoki xizmat haqida yozing:</b>",
     askPhoto:       "🖼 <b>Rasm yuborasizmi?</b>\n<i>/skip — o'tkazib yuborish</i>",
-    askPrice:       `💰 <b>Narx yoki shartlar?</b>\n<i>/skip — o'tkazib yuborish</i>`,
+    askPrice:       "💰 <b>Narx yoki shartlar?</b>\n<i>/skip — o'tkazib yuborish</i>",
     sendPhotoOrSkip:"Rasm yuboring yoki /skip yozing",
 
-    // Preview
     previewTitle: "👀 <b>E'loningizni tekshiring:</b>",
     previewCat:   "📂 Kategoriya",
     previewType:  "📢 Turi",
@@ -109,7 +101,6 @@ const T = {
     btnEdit:      "✏️ Tahrirlash",
     btnCancel:    "❌ Bekor qilish",
 
-    // Edit
     editTitle:    "✏️ <b>Nimani o'zgartirish?</b>",
     editName:     "👤 Ism",
     editPhone:    "📞 Telefon",
@@ -122,7 +113,6 @@ const T = {
     editAskPrice: "💰 Yangi narxni yuboring <i>(/skip)</i>:",
     editAskPhoto: "🖼 Yangi rasm yuboring <i>(/skip)</i>:",
 
-    // Payment
     payTitle:    "💳 <b>To'lov ma'lumotlari:</b>",
     payCard:     "Karta",
     payHolder:   "Egasi",
@@ -135,15 +125,13 @@ const T = {
     rejected:    "❌ <b>To'lovingiz tasdiqlanmadi.</b>\nSavol uchun: @",
     cancelled:   "❌ Bekor qilindi.",
 
-    // My Ads
     myAdsTitle:      "📋 <b>Sizning e'lonlaringiz:</b>",
-    noAds:           `<i>Sizda hozircha e'lonlar yo'q.</i>\n\nBirinchi e'lon berish uchun <b>📢 E'lon berish</b> tugmasini bosing.`,
+    noAds:           "<i>Sizda hozircha e'lonlar yo'q.</i>\n\nBirinchi e'lon berish uchun <b>📢 E'lon berish</b> tugmasini bosing.",
     statusWaiting:   "⏳ To'lov kutilmoqda",
     statusReviewing: "🕐 Ko'rib chiqilmoqda",
     statusApproved:  "✅ Tasdiqlangan",
     statusRejected:  "❌ Rad etilgan",
 
-    // My Account
     accountTitle:     "💰 <b>Sizning hisobingiz:</b>",
     accountTotal:     "📊 Jami e'lonlar",
     accountApproved:  "✅ Tasdiqlangan",
@@ -152,12 +140,11 @@ const T = {
     accountWaiting:   "⏳ To'lov kutilmoqda",
     noActivity:       "<i>Hali birorta e'lon yo'q.</i>",
 
-    // Settings
-    settingsTitle:   `⚙️ <b>Sozlamalar</b>\n${DIV}`,
-    btnChangeLang:   "🌐 Tilni o'zgartirish",
-    btnChangePhone:  "📞 Telefon raqamini yangilash",
-    askNewPhone:     "📞 <b>Yangi telefon raqamingizni yuboring:</b>",
-    phoneUpdated:    "✅ <b>Telefon raqamingiz yangilandi!</b>",
+    settingsTitle:  `⚙️ <b>Sozlamalar</b>\n${DIV}`,
+    btnChangeLang:  "🌐 Tilni o'zgartirish",
+    btnChangePhone: "📞 Telefon raqamini yangilash",
+    askNewPhone:    "📞 <b>Yangi telefon raqamingizni yuboring:</b>",
+    phoneUpdated:   "✅ <b>Telefon raqamingiz yangilandi!</b>",
 
     typeSell:    "📢 Sotaman",
     typeBuy:     "🛒 Sotib olaman",
@@ -242,11 +229,11 @@ const T = {
     accountWaiting:   "⏳ Ожидает оплаты",
     noActivity:       "<i>Объявлений пока нет.</i>",
 
-    settingsTitle:   `⚙️ <b>Настройки</b>\n${DIV}`,
-    btnChangeLang:   "🌐 Изменить язык",
-    btnChangePhone:  "📞 Обновить номер телефона",
-    askNewPhone:     "📞 <b>Отправьте новый номер телефона:</b>",
-    phoneUpdated:    "✅ <b>Номер телефона обновлён!</b>",
+    settingsTitle:  `⚙️ <b>Настройки</b>\n${DIV}`,
+    btnChangeLang:  "🌐 Изменить язык",
+    btnChangePhone: "📞 Обновить номер телефона",
+    askNewPhone:    "📞 <b>Отправьте новый номер телефона:</b>",
+    phoneUpdated:   "✅ <b>Номер телефона обновлён!</b>",
 
     typeSell:    "📢 Продам",
     typeBuy:     "🛒 Покупаю",
@@ -256,7 +243,7 @@ const T = {
 
 function tr(lang, key) { return T[lang]?.[key] ?? T.uz[key] ?? key }
 
-// ─── Menu button detection ────────────────────────────────────────────────────
+// ─── Menu & back detection ────────────────────────────────────────────────────
 
 function getMenuAction(text, lang) {
   if (text === tr(lang, 'btnPost'))     return 'post'
@@ -266,11 +253,16 @@ function getMenuAction(text, lang) {
   return null
 }
 
+function backBtn(lang)     { return lang === 'ru' ? '⬅️ Назад' : '⬅️ Orqaga' }
+function isBackText(text)  { return text === '⬅️ Orqaga' || text === '⬅️ Назад' }
+function pushHistory(d, s) { if (!d.history) d.history = []; d.history.push(s) }
+
 // ─── State ────────────────────────────────────────────────────────────────────
-// Steps: (lang_select) → name → phone → description → photo → price →
-//        preview → waiting_receipt
-// Edit steps: edit_name | edit_phone | edit_desc | edit_price | edit_photo
-// Special: price_confirm | settings_phone
+// history[] tracks visited steps so goBack can pop and replay them
+// Steps: ad_type → category → price_confirm → name → phone → description →
+//        photo → price → preview → waiting_receipt
+// Edit steps (come from preview): edit_name | edit_phone | edit_desc | edit_price | edit_photo
+// Special: settings_phone
 
 const dialogs    = new Map()
 const pending    = new Map()
@@ -293,43 +285,49 @@ function langKeyboard() {
 }
 
 function persistentMenuKeyboard(lang) {
-  const b = (key) => tr(lang, key)
   return {
     keyboard: [
-      [b('btnPost'),    b('btnMyAds')   ],
-      [b('btnAccount'), b('btnSettings')],
+      [tr(lang, 'btnPost'),    tr(lang, 'btnMyAds')   ],
+      [tr(lang, 'btnAccount'), tr(lang, 'btnSettings')],
     ],
-    resize_keyboard:   true,
-    is_persistent:     true,
+    resize_keyboard: true,
+    is_persistent:   true,
   }
 }
 
+// adTypeKeyboard includes ⬅️ back (→ idle / no more history)
 function adTypeKeyboard(lang) {
   return {
     inline_keyboard: [
       [{ text: tr(lang, 'menuSell'),    callback_data: 'menu_sell'    }],
       [{ text: tr(lang, 'menuBuy'),     callback_data: 'menu_buy'     }],
       [{ text: tr(lang, 'menuService'), callback_data: 'menu_service' }],
+      [{ text: backBtn(lang),           callback_data: 'back'         }],
     ],
   }
 }
 
-function categoryKeyboard(categories) {
+// categoryKeyboard: pass lang to append ⬅️ row
+function categoryKeyboard(categories, lang) {
   const rows = []
   for (let i = 0; i < categories.length; i += 2) {
     const row = [{ text: categories[i].name, callback_data: `cat_${i}` }]
     if (categories[i + 1]) row.push({ text: categories[i + 1].name, callback_data: `cat_${i + 1}` })
     rows.push(row)
   }
+  if (lang) rows.push([{ text: backBtn(lang), callback_data: 'back' }])
   return { inline_keyboard: rows }
 }
 
 function priceConfirmKeyboard(lang) {
   return {
-    inline_keyboard: [[
-      { text: tr(lang, 'btnProceed'),      callback_data: 'confirm_price'  },
-      { text: tr(lang, 'btnCancelInline'), callback_data: 'preview_cancel' },
-    ]],
+    inline_keyboard: [
+      [{ text: tr(lang, 'btnProceed'), callback_data: 'confirm_price' }],
+      [
+        { text: backBtn(lang),             callback_data: 'back'           },
+        { text: tr(lang, 'btnCancelInline'), callback_data: 'preview_cancel' },
+      ],
+    ],
   }
 }
 
@@ -337,8 +335,22 @@ function previewKeyboard(lang) {
   return {
     inline_keyboard: [
       [{ text: tr(lang, 'btnConfirm'), callback_data: 'preview_confirm' }],
+      [{ text: tr(lang, 'btnEdit'),    callback_data: 'preview_edit'    }],
       [
-        { text: tr(lang, 'btnEdit'),   callback_data: 'preview_edit'   },
+        { text: backBtn(lang),          callback_data: 'back'           },
+        { text: tr(lang, 'btnCancel'), callback_data: 'preview_cancel' },
+      ],
+    ],
+  }
+}
+
+// Payment page: copy card + ⬅️ back to preview + ❌ cancel
+function paymentKeyboard(lang) {
+  return {
+    inline_keyboard: [
+      [{ text: tr(lang, 'copyCard'),  callback_data: 'copy_card'      }],
+      [
+        { text: backBtn(lang),         callback_data: 'back'           },
         { text: tr(lang, 'btnCancel'), callback_data: 'preview_cancel' },
       ],
     ],
@@ -361,9 +373,14 @@ function editFieldKeyboard(lang) {
   }
 }
 
-function phoneKeyboard(lang) {
+// Phone keyboard with ⬅️ as a reply-keyboard text button
+// one_time_keyboard hides it automatically on any button press
+function phoneWithBackKeyboard(lang) {
   return {
-    keyboard: [[{ text: tr(lang, 'phoneBtn'), request_contact: true }]],
+    keyboard: [
+      [{ text: tr(lang, 'phoneBtn'), request_contact: true }],
+      [{ text: backBtn(lang) }],
+    ],
     resize_keyboard:   true,
     one_time_keyboard: true,
   }
@@ -377,6 +394,9 @@ function settingsKeyboard(lang) {
     ],
   }
 }
+
+// Single ⬅️ row used in text-input steps
+function backRow(lang) { return [{ text: backBtn(lang), callback_data: 'back' }] }
 
 // ─── Text builders ────────────────────────────────────────────────────────────
 
@@ -394,13 +414,8 @@ function adTypeName(lang, adType) {
 }
 
 function adStatusText(lang, status) {
-  const map = {
-    waiting_payment: tr(lang, 'statusWaiting'),
-    reviewing:       tr(lang, 'statusReviewing'),
-    approved:        tr(lang, 'statusApproved'),
-    rejected:        tr(lang, 'statusRejected'),
-  }
-  return map[status] ?? status
+  return { waiting_payment: tr(lang,'statusWaiting'), reviewing: tr(lang,'statusReviewing'),
+           approved: tr(lang,'statusApproved'), rejected: tr(lang,'statusRejected') }[status] ?? status
 }
 
 function buildPriceConfirmText(lang, catName, price) {
@@ -413,9 +428,7 @@ function buildPriceConfirmText(lang, catName, price) {
 function buildPreviewText(d, cfg, lang) {
   const cat = cfg.categories[d.categoryIdx]
   return [
-    tr(lang, 'previewTitle'),
-    DIV,
-    '',
+    tr(lang, 'previewTitle'), DIV, '',
     `${tr(lang, 'previewCat')}: <b>${cat.name}</b>`,
     `${tr(lang, 'previewType')}: ${adTypeName(lang, d.adType)}`,
     `${tr(lang, 'previewName')}: <b>${d.name}</b>`,
@@ -423,9 +436,7 @@ function buildPreviewText(d, cfg, lang) {
     `${tr(lang, 'previewDesc')}: ${d.description}`,
     `${tr(lang, 'previewPrice')}: ${d.conditions ?? '—'}`,
     `${tr(lang, 'previewPhoto')}: ${d.adPhotoFileId ? tr(lang, 'photoYes') : tr(lang, 'photoNo')}`,
-    '',
-    DIV,
-    tr(lang, 'previewQ'),
+    '', DIV, tr(lang, 'previewQ'),
   ].join('\n')
 }
 
@@ -433,15 +444,11 @@ function buildPaymentText(d, cfg, lang) {
   const cat = cfg.categories[d.categoryIdx]
   const so  = lang === 'ru' ? 'сум' : "so'm"
   return [
-    tr(lang, 'payTitle'),
-    DIV,
-    '',
+    tr(lang, 'payTitle'), DIV, '',
     `${tr(lang, 'payCard')}: <code>${cfg.card_number}</code>`,
     `${tr(lang, 'payHolder')}: <b>${cfg.card_holder}</b>`,
     `${tr(lang, 'payAmount')}: <b>${fmt(cat.price)} ${so}</b>`,
-    '',
-    DIV,
-    tr(lang, 'payInstruct'),
+    '', DIV, tr(lang, 'payInstruct'),
   ].join('\n')
 }
 
@@ -449,9 +456,7 @@ function buildOwnerText(p, cfg) {
   const cat     = cfg.categories[p.categoryIdx]
   const userStr = p.username ? `@${p.username}` : `#${p.userId}`
   return [
-    "💳 <b>Yangi to'lov!</b>",
-    DIV,
-    '',
+    "💳 <b>Yangi to'lov!</b>", DIV, '',
     `👤 <b>${p.name}</b> (${userStr})`,
     `📞 <code>${p.phone}</code>`,
     `📂 ${cat.name}`,
@@ -465,8 +470,7 @@ function buildGroupPostText(p, cfg, botUsername) {
   const lines = [
     `📂 <b>${cat.name.toUpperCase()}</b>`,
     `📢 <i>${adTypeName('uz', p.adType)}</i>`,
-    DIV,
-    '',
+    DIV, '',
     `👤 <b>${p.name}</b>`,
     `📞 <code>${p.phone}</code>`,
     `📝 ${p.description}`,
@@ -479,29 +483,15 @@ function buildGroupPostText(p, cfg, botUsername) {
 // ─── Flow helpers ─────────────────────────────────────────────────────────────
 
 async function showLangSelect(chatId) {
-  await bot.sendMessage(chatId, 'Tilni tanlang / Выберите язык:', {
-    reply_markup: langKeyboard(),
-  })
+  await bot.sendMessage(chatId, 'Tilni tanlang / Выберите язык:', { reply_markup: langKeyboard() })
 }
 
-async function showPersistentMenu(chatId, lang, welcomeText) {
-  await bot.sendMessage(chatId, welcomeText, {
-    parse_mode:   'HTML',
-    reply_markup: persistentMenuKeyboard(lang),
-  })
-}
-
-async function askPhone(chatId, lang) {
-  await bot.sendMessage(chatId, tr(lang, 'askPhone'), {
-    parse_mode:   'HTML',
-    reply_markup: phoneKeyboard(lang),
-  })
+async function showPersistentMenu(chatId, lang, text) {
+  await bot.sendMessage(chatId, text, { parse_mode: 'HTML', reply_markup: persistentMenuKeyboard(lang) })
 }
 
 async function removeKeyboard(chatId, text) {
-  await bot.sendMessage(chatId, text, {
-    reply_markup: { remove_keyboard: true },
-  })
+  await bot.sendMessage(chatId, text, { reply_markup: { remove_keyboard: true } })
 }
 
 async function showPreview(chatId, userId, d) {
@@ -512,25 +502,17 @@ async function showPreview(chatId, userId, d) {
   setDialog(userId, d)
   if (d.adPhotoFileId) {
     await bot.sendPhoto(chatId, d.adPhotoFileId, {
-      caption:      text,
-      parse_mode:   'HTML',
-      reply_markup: previewKeyboard(lang),
+      caption: text, parse_mode: 'HTML', reply_markup: previewKeyboard(lang),
     })
   } else {
-    await bot.sendMessage(chatId, text, {
-      parse_mode:   'HTML',
-      reply_markup: previewKeyboard(lang),
-    })
+    await bot.sendMessage(chatId, text, { parse_mode: 'HTML', reply_markup: previewKeyboard(lang) })
   }
 }
 
 async function showMyAds(chatId, userId, lang) {
   const ads = getUserAds(userId)
   if (ads.length === 0) {
-    await bot.sendMessage(chatId,
-      `${tr(lang, 'myAdsTitle')}\n${DIV}\n\n${tr(lang, 'noAds')}`,
-      { parse_mode: 'HTML' }
-    )
+    await bot.sendMessage(chatId, `${tr(lang,'myAdsTitle')}\n${DIV}\n\n${tr(lang,'noAds')}`, { parse_mode:'HTML' })
     return
   }
   const lines = [tr(lang, 'myAdsTitle'), DIV, '']
@@ -549,58 +531,145 @@ async function showMyAccount(chatId, userId, lang) {
   const rejected  = ads.filter(a => a.status === 'rejected').length
   const reviewing = ads.filter(a => a.status === 'reviewing').length
   const waiting   = ads.filter(a => a.status === 'waiting_payment').length
-
   if (total === 0) {
-    await bot.sendMessage(chatId,
-      `${tr(lang, 'accountTitle')}\n${DIV}\n\n${tr(lang, 'noActivity')}`,
-      { parse_mode: 'HTML' }
-    )
+    await bot.sendMessage(chatId, `${tr(lang,'accountTitle')}\n${DIV}\n\n${tr(lang,'noActivity')}`, { parse_mode:'HTML' })
     return
   }
   await bot.sendMessage(chatId, [
-    tr(lang, 'accountTitle'),
-    DIV,
-    '',
-    `${tr(lang, 'accountTotal')}: <b>${total}</b> ta`,
-    `${tr(lang, 'accountApproved')}: <b>${approved}</b> ta`,
-    `${tr(lang, 'accountRejected')}: <b>${rejected}</b> ta`,
-    `${tr(lang, 'accountReviewing')}: <b>${reviewing}</b> ta`,
-    `${tr(lang, 'accountWaiting')}: <b>${waiting}</b> ta`,
+    tr(lang, 'accountTitle'), DIV, '',
+    `${tr(lang,'accountTotal')}: <b>${total}</b> ta`,
+    `${tr(lang,'accountApproved')}: <b>${approved}</b> ta`,
+    `${tr(lang,'accountRejected')}: <b>${rejected}</b> ta`,
+    `${tr(lang,'accountReviewing')}: <b>${reviewing}</b> ta`,
+    `${tr(lang,'accountWaiting')}: <b>${waiting}</b> ta`,
   ].join('\n'), { parse_mode: 'HTML' })
 }
 
 async function showSettings(chatId, lang) {
   await bot.sendMessage(chatId, tr(lang, 'settingsTitle'), {
-    parse_mode:   'HTML',
-    reply_markup: settingsKeyboard(lang),
+    parse_mode: 'HTML', reply_markup: settingsKeyboard(lang),
   })
+}
+
+// ─── Step renderer — used by both forward flow and goBack ─────────────────────
+// Sets d.step, calls setDialog, then sends the right UI for that step.
+
+async function showStep(chatId, userId, step, d) {
+  const lang = d.lang
+  const cfg  = loadConfig()
+  d.step = step
+  setDialog(userId, d)
+
+  switch (step) {
+    case 'ad_type':
+      await bot.sendMessage(chatId, tr(lang, 'adTypeTitle'), {
+        parse_mode: 'HTML', reply_markup: adTypeKeyboard(lang),
+      })
+      break
+
+    case 'category':
+      await bot.sendMessage(chatId, tr(lang, 'chooseCategory'), {
+        parse_mode: 'HTML', reply_markup: categoryKeyboard(cfg.categories, lang),
+      })
+      break
+
+    case 'price_confirm': {
+      const cat = cfg.categories[d.categoryIdx]
+      await bot.sendMessage(chatId, buildPriceConfirmText(lang, cat.name, cat.price), {
+        parse_mode: 'HTML', reply_markup: priceConfirmKeyboard(lang),
+      })
+      break
+    }
+
+    case 'name':
+      await bot.sendMessage(chatId, tr(lang, 'askName'), {
+        parse_mode: 'HTML', reply_markup: { inline_keyboard: [backRow(lang)] },
+      })
+      break
+
+    case 'phone':
+      await bot.sendMessage(chatId, tr(lang, 'askPhone'), {
+        parse_mode: 'HTML', reply_markup: phoneWithBackKeyboard(lang),
+      })
+      break
+
+    case 'description':
+      await bot.sendMessage(chatId, tr(lang, 'askDescription'), {
+        parse_mode: 'HTML', reply_markup: { inline_keyboard: [backRow(lang)] },
+      })
+      break
+
+    case 'photo':
+      await bot.sendMessage(chatId, tr(lang, 'askPhoto'), {
+        parse_mode: 'HTML', reply_markup: { inline_keyboard: [backRow(lang)] },
+      })
+      break
+
+    case 'price':
+      await bot.sendMessage(chatId, tr(lang, 'askPrice'), {
+        parse_mode: 'HTML', reply_markup: { inline_keyboard: [backRow(lang)] },
+      })
+      break
+
+    case 'preview':
+      await showPreview(chatId, userId, d)
+      break
+
+    default:
+      // Safety fallback
+      d.step = 'ad_type'; d.history = []; setDialog(userId, d)
+      await bot.sendMessage(chatId, tr(lang, 'adTypeTitle'), {
+        parse_mode: 'HTML', reply_markup: adTypeKeyboard(lang),
+      })
+  }
+}
+
+// ─── Back navigation ──────────────────────────────────────────────────────────
+
+async function goBack(chatId, userId) {
+  const d = getDialog(userId)
+  if (!d) return
+  const lang = d.lang
+
+  // Edit steps always return to preview (no history used)
+  if (d.step?.startsWith('edit_')) {
+    d.step = 'preview'; setDialog(userId, d)
+    await showPreview(chatId, userId, d)
+    return
+  }
+
+  // Settings phone → back to settings panel
+  if (d.step === 'settings_phone') {
+    d.step = 'idle'; setDialog(userId, d)
+    await showSettings(chatId, lang)
+    return
+  }
+
+  if (!d.history || d.history.length === 0) {
+    // No history left — return to idle; persistent menu is always visible
+    setDialog(userId, { lang, step: 'idle' })
+    await bot.sendMessage(chatId, tr(lang, 'cancelled'), { parse_mode: 'HTML' })
+    return
+  }
+
+  const prevStep = d.history.pop()
+  await showStep(chatId, userId, prevStep, d)
 }
 
 // ─── Menu button handler ──────────────────────────────────────────────────────
 
 async function handleMenuButton(chatId, userId, action) {
   const lang = getUserLang(userId)
-
   if (action === 'post') {
-    setDialog(userId, { lang, step: 'ad_type' })
+    setDialog(userId, { lang, step: 'ad_type', history: [] })
     await bot.sendMessage(chatId, tr(lang, 'adTypeTitle'), {
-      parse_mode:   'HTML',
-      reply_markup: adTypeKeyboard(lang),
+      parse_mode: 'HTML', reply_markup: adTypeKeyboard(lang),
     })
     return
   }
-  if (action === 'myads') {
-    await showMyAds(chatId, userId, lang)
-    return
-  }
-  if (action === 'account') {
-    await showMyAccount(chatId, userId, lang)
-    return
-  }
-  if (action === 'settings') {
-    await showSettings(chatId, lang)
-    return
-  }
+  if (action === 'myads')   { await showMyAds(chatId, userId, lang);    return }
+  if (action === 'account') { await showMyAccount(chatId, userId, lang); return }
+  if (action === 'settings'){ await showSettings(chatId, lang);          return }
 }
 
 // ─── Commands ─────────────────────────────────────────────────────────────────
@@ -608,19 +677,16 @@ async function handleMenuButton(chatId, userId, action) {
 bot.onText(/^\/start/, async (msg) => {
   if (msg.chat.type !== 'private') return
   console.log(`[START] User: ${msg.from.id} @${msg.from.username}`)
-  clearDialog(msg.from.id)
-  adminState.delete(msg.from.id)
+  clearDialog(msg.from.id); adminState.delete(msg.from.id)
   await showLangSelect(msg.chat.id)
 })
 
 bot.onText(/^\/cancel/, async (msg) => {
   if (msg.chat.type !== 'private') return
   const lang = getUserLang(msg.from.id)
-  clearDialog(msg.from.id)
-  adminState.delete(msg.from.id)
+  clearDialog(msg.from.id); adminState.delete(msg.from.id)
   await bot.sendMessage(msg.chat.id, tr(lang, 'cancelled'), {
-    parse_mode:   'HTML',
-    reply_markup: { remove_keyboard: true },
+    parse_mode: 'HTML', reply_markup: { remove_keyboard: true },
   })
 })
 
@@ -630,58 +696,44 @@ bot.onText(/^\/prices/, async (msg) => {
   if (Number(msg.from?.id) !== OWNER_ID) return
   const cfg   = loadConfig()
   const lines = ['📋 <b>Kategoriyalar narxlari:</b>', DIV, '']
-  cfg.categories.forEach((cat, i) => {
-    lines.push(`${i + 1}. ${cat.name} — <b>${fmt(cat.price)} so'm</b>`)
-  })
+  cfg.categories.forEach((cat, i) => lines.push(`${i+1}. ${cat.name} — <b>${fmt(cat.price)} so'm</b>`))
   const buttons = cfg.categories.map((cat, i) => [{
-    text: `✏️ ${i + 1}. ${cat.name}`, callback_data: `admin_editprice_${i}`,
+    text: `✏️ ${i+1}. ${cat.name}`, callback_data: `admin_editprice_${i}`,
   }])
   await bot.sendMessage(msg.chat.id, lines.join('\n'), {
-    parse_mode:   'HTML',
-    reply_markup: { inline_keyboard: buttons },
+    parse_mode: 'HTML', reply_markup: { inline_keyboard: buttons },
   })
 })
 
 bot.onText(/^\/setprice\s+(\d+)\s+(\d+)/, async (msg, match) => {
   if (Number(msg.from?.id) !== OWNER_ID) return
-  const idx   = Number(match[1]) - 1
-  const price = Number(match[2])
-  const cfg   = loadConfig()
+  const idx = Number(match[1]) - 1; const price = Number(match[2])
+  const cfg = loadConfig()
   if (idx < 0 || idx >= cfg.categories.length) {
-    await bot.sendMessage(msg.chat.id, `❌ Raqam 1–${cfg.categories.length} oralig'ida bo'lishi kerak.`)
-    return
+    await bot.sendMessage(msg.chat.id, `❌ Raqam 1–${cfg.categories.length} oralig'ida bo'lishi kerak.`); return
   }
-  cfg.categories[idx].price = price
-  saveConfig(cfg)
+  cfg.categories[idx].price = price; saveConfig(cfg)
   await bot.sendMessage(msg.chat.id,
     `✅ <b>${cfg.categories[idx].name}</b> narxi <b>${fmt(price)} so'm</b>ga o'zgartirildi`,
-    { parse_mode: 'HTML' }
-  )
+    { parse_mode: 'HTML' })
 })
 
 bot.onText(/^\/setcard (.+)/, async (msg, match) => {
   if (Number(msg.from?.id) !== OWNER_ID) return
-  const cfg = loadConfig()
-  cfg.card_number = match[1].trim()
-  saveConfig(cfg)
+  const cfg = loadConfig(); cfg.card_number = match[1].trim(); saveConfig(cfg)
   await bot.sendMessage(msg.chat.id, `✅ Karta raqami: <code>${cfg.card_number}</code>`, { parse_mode: 'HTML' })
 })
 
 bot.onText(/^\/settopic\s+(\d+)\s+(\d+)/, async (msg, match) => {
   if (Number(msg.from?.id) !== OWNER_ID) return
-  const idx      = Number(match[1]) - 1
-  const threadId = Number(match[2])
-  const cfg      = loadConfig()
+  const idx = Number(match[1]) - 1; const threadId = Number(match[2])
+  const cfg = loadConfig()
   if (idx < 0 || idx >= cfg.categories.length) {
-    await bot.sendMessage(msg.chat.id, `❌ Raqam 1–${cfg.categories.length} oralig'ida bo'lishi kerak.`)
-    return
+    await bot.sendMessage(msg.chat.id, `❌ Raqam 1–${cfg.categories.length} oralig'ida bo'lishi kerak.`); return
   }
-  cfg.categories[idx].topic_id = threadId
-  saveConfig(cfg)
+  cfg.categories[idx].topic_id = threadId; saveConfig(cfg)
   await bot.sendMessage(msg.chat.id,
-    `✅ <b>${cfg.categories[idx].name}</b> uchun mavzu ID = <code>${threadId}</code>`,
-    { parse_mode: 'HTML' }
-  )
+    `✅ <b>${cfg.categories[idx].name}</b> uchun mavzu ID = <code>${threadId}</code>`, { parse_mode: 'HTML' })
 })
 
 bot.onText(/^\/threadid/, async (msg) => {
@@ -689,17 +741,14 @@ bot.onText(/^\/threadid/, async (msg) => {
   const tid = msg.message_thread_id ?? null
   await bot.sendMessage(msg.chat.id,
     tid ? `Thread ID: <code>${tid}</code>` : "Bu oddiy chat — thread_id aniqlanmadi.",
-    { parse_mode: 'HTML', ...(tid ? { message_thread_id: tid } : {}) }
-  )
+    { parse_mode: 'HTML', ...(tid ? { message_thread_id: tid } : {}) })
 })
 
 bot.onText(/^\/stats/, async (msg) => {
   if (Number(msg.from?.id) !== OWNER_ID) return
   const s = loadStats()
   await bot.sendMessage(msg.chat.id, [
-    '📊 <b>Statistika:</b>',
-    DIV,
-    '',
+    `📊 <b>Statistika:</b>\n${DIV}`, '',
     `📨 Jami cheklar: <b>${s.total}</b>`,
     `✅ Tasdiqlangan: <b>${s.approved}</b>`,
     `❌ Rad etilgan: <b>${s.rejected}</b>`,
@@ -708,15 +757,14 @@ bot.onText(/^\/stats/, async (msg) => {
 
 bot.onText(/^\/admin/, async (msg) => {
   if (Number(msg.from?.id) !== OWNER_ID) return
-  adminState.delete(OWNER_ID)
-  await showAdminMenu(msg.chat.id)
+  adminState.delete(OWNER_ID); await showAdminMenu(msg.chat.id)
 })
 
 // ─── Admin panel ──────────────────────────────────────────────────────────────
 
 async function showAdminMenu(chatId) {
   await bot.sendMessage(chatId, `⚙️ <b>Admin panel</b>\n${DIV}`, {
-    parse_mode:   'HTML',
+    parse_mode: 'HTML',
     reply_markup: {
       inline_keyboard: [
         [{ text: "💳 Kartani o'zgartirish",   callback_data: 'admin_card'   }],
@@ -731,30 +779,23 @@ async function handleAdminInput(chatId, text, as) {
   const cfg = loadConfig()
   if (as.step === 'card_number') {
     adminState.set(OWNER_ID, { step: 'card_holder', card_number: text })
-    await bot.sendMessage(chatId, "Karta egasining ismini yuboring:")
-    return
+    await bot.sendMessage(chatId, "Karta egasining ismini yuboring:"); return
   }
   if (as.step === 'card_holder') {
-    cfg.card_number = as.card_number
-    cfg.card_holder = text
-    saveConfig(cfg)
+    cfg.card_number = as.card_number; cfg.card_holder = text; saveConfig(cfg)
     adminState.delete(OWNER_ID)
     await bot.sendMessage(chatId, "✅ Karta ma'lumotlari yangilandi!", { parse_mode: 'HTML' })
-    await showAdminMenu(chatId)
-    return
+    await showAdminMenu(chatId); return
   }
   if (as.step === 'price_input') {
     const price = Number(String(text).replace(/\s/g, ''))
     if (!price || isNaN(price) || price <= 0) {
-      await bot.sendMessage(chatId, "❌ Noto'g'ri raqam. Faqat son yuboring:")
-      return
+      await bot.sendMessage(chatId, "❌ Noto'g'ri raqam. Faqat son yuboring:"); return
     }
-    cfg.categories[as.categoryIdx].price = price
-    saveConfig(cfg)
+    cfg.categories[as.categoryIdx].price = price; saveConfig(cfg)
     adminState.delete(OWNER_ID)
     await bot.sendMessage(chatId, `✅ Narx yangilandi: <b>${fmt(price)} so'm</b>`, { parse_mode: 'HTML' })
-    await showAdminMenu(chatId)
-    return
+    await showAdminMenu(chatId); return
   }
 }
 
@@ -766,13 +807,13 @@ bot.on('message', async (msg) => {
   const userId = msg.from.id
   const text   = (msg.text || '').trim()
 
-  // Admin flow takes priority
+  // 1. Admin flow takes priority
   if (userId === OWNER_ID && text && !text.startsWith('/')) {
     const as = adminState.get(OWNER_ID)
     if (as) { await handleAdminInput(msg.chat.id, text, as); return }
   }
 
-  // Contact (phone sharing)
+  // 2. Contact (phone sharing via request_contact button)
   if (msg.contact) {
     const d = getDialog(userId)
     if (!d) return
@@ -780,24 +821,23 @@ bot.on('message', async (msg) => {
     const lang  = d.lang
 
     if (d.step === 'phone') {
-      d.phone = phone; d.step = 'description'
+      d.phone = phone
+      pushHistory(d, 'phone')
       setDialog(userId, d)
       await removeKeyboard(msg.chat.id, '✅')
-      await bot.sendMessage(msg.chat.id, tr(lang, 'askDescription'), { parse_mode: 'HTML' })
+      await showStep(msg.chat.id, userId, 'description', d)
     } else if (d.step === 'edit_phone') {
-      d.phone = phone
-      setDialog(userId, d)
+      d.phone = phone; setDialog(userId, d)
       await removeKeyboard(msg.chat.id, '✅')
       await showPreview(msg.chat.id, userId, d)
     } else if (d.step === 'settings_phone') {
-      clearDialog(userId)
-      setDialog(userId, { lang })
+      clearDialog(userId); setDialog(userId, { lang })
       await removeKeyboard(msg.chat.id, tr(lang, 'phoneUpdated'))
     }
     return
   }
 
-  // /skip passes only in valid steps; other commands handled by onText
+  // 3. /skip passes only in valid steps; other commands handled by onText
   if (text.startsWith('/')) {
     const d      = getDialog(userId)
     const skipOk = d && text === '/skip' &&
@@ -808,12 +848,18 @@ bot.on('message', async (msg) => {
   const d    = getDialog(userId)
   const lang = d?.lang ?? 'uz'
 
-  // Menu button pressed — intercept unless waiting for receipt photo
+  // 4. ⬅️ back text button (sent from phoneWithBackKeyboard reply keyboard)
+  //    one_time_keyboard auto-hides it — no extra removeKeyboard needed
+  if (isBackText(text) && d && ['phone', 'edit_phone', 'settings_phone'].includes(d.step)) {
+    await goBack(msg.chat.id, userId)
+    return
+  }
+
+  // 5. Persistent bottom menu buttons
   if (text && !text.startsWith('/')) {
     const action = getMenuAction(text, lang)
     if (action) {
       if (d?.step === 'waiting_receipt') {
-        // Still need the receipt; remind
         await bot.sendMessage(msg.chat.id, tr(lang, 'waitReceipt'), { parse_mode: 'HTML' })
       } else {
         await handleMenuButton(msg.chat.id, userId, action)
@@ -824,92 +870,97 @@ bot.on('message', async (msg) => {
 
   if (!d) return
 
-  // Photo messages
+  // 6. Photo messages
   if (msg.photo) {
     const fileId = msg.photo[msg.photo.length - 1].file_id
     if (d.step === 'photo') {
-      d.adPhotoFileId = fileId; d.step = 'price'
-      setDialog(userId, d)
-      await bot.sendMessage(msg.chat.id, tr(lang, 'askPrice'), { parse_mode: 'HTML' })
+      d.adPhotoFileId = fileId
+      pushHistory(d, 'photo')
+      await showStep(msg.chat.id, userId, 'price', d)
       return
     }
     if (d.step === 'edit_photo') {
-      d.adPhotoFileId = fileId
-      setDialog(userId, d)
-      await showPreview(msg.chat.id, userId, d)
-      return
+      d.adPhotoFileId = fileId; setDialog(userId, d)
+      await showPreview(msg.chat.id, userId, d); return
     }
     if (d.step === 'waiting_receipt') {
-      await handleReceipt(msg, fileId, d)
-      return
+      await handleReceipt(msg, fileId, d); return
     }
     return
   }
 
   if (!text) return
 
+  // 7. Text input for form steps
   switch (d.step) {
     case 'name':
-      d.name = text; d.step = 'phone'
-      setDialog(userId, d)
-      await askPhone(msg.chat.id, lang)
+      d.name = text
+      pushHistory(d, 'name')
+      await showStep(msg.chat.id, userId, 'phone', d)
       break
 
     case 'phone':
-      await askPhone(msg.chat.id, lang)
+      // User typed text instead of using the contact button — re-prompt
+      await bot.sendMessage(msg.chat.id, tr(lang, 'askPhone'), {
+        parse_mode: 'HTML', reply_markup: phoneWithBackKeyboard(lang),
+      })
       break
 
     case 'description':
-      d.description = text; d.step = 'photo'
-      setDialog(userId, d)
-      await bot.sendMessage(msg.chat.id, tr(lang, 'askPhoto'), { parse_mode: 'HTML' })
+      d.description = text
+      pushHistory(d, 'description')
+      await showStep(msg.chat.id, userId, 'photo', d)
       break
 
     case 'photo':
       if (text === '/skip') {
-        d.adPhotoFileId = null; d.step = 'price'
-        setDialog(userId, d)
-        await bot.sendMessage(msg.chat.id, tr(lang, 'askPrice'), { parse_mode: 'HTML' })
+        d.adPhotoFileId = null
+        pushHistory(d, 'photo')
+        await showStep(msg.chat.id, userId, 'price', d)
       } else {
-        await bot.sendMessage(msg.chat.id, tr(lang, 'sendPhotoOrSkip'))
+        await bot.sendMessage(msg.chat.id, tr(lang, 'sendPhotoOrSkip'), {
+          reply_markup: { inline_keyboard: [backRow(lang)] },
+        })
       }
       break
 
     case 'price':
       d.conditions = text === '/skip' ? null : text
+      pushHistory(d, 'price')
       setDialog(userId, d)
       await showPreview(msg.chat.id, userId, d)
       break
 
+    // Edit steps — back goes to preview via goBack
     case 'edit_name':
-      d.name = text
-      setDialog(userId, d)
+      d.name = text; setDialog(userId, d)
       await showPreview(msg.chat.id, userId, d)
       break
 
     case 'edit_phone':
-      await askPhone(msg.chat.id, lang)
+      await bot.sendMessage(msg.chat.id, tr(lang, 'editAskPhone'), {
+        parse_mode: 'HTML', reply_markup: phoneWithBackKeyboard(lang),
+      })
       break
 
     case 'edit_desc':
-      d.description = text
-      setDialog(userId, d)
+      d.description = text; setDialog(userId, d)
       await showPreview(msg.chat.id, userId, d)
       break
 
     case 'edit_price':
-      d.conditions = text === '/skip' ? null : text
-      setDialog(userId, d)
+      d.conditions = text === '/skip' ? null : text; setDialog(userId, d)
       await showPreview(msg.chat.id, userId, d)
       break
 
     case 'edit_photo':
       if (text === '/skip') {
-        d.adPhotoFileId = null
-        setDialog(userId, d)
+        d.adPhotoFileId = null; setDialog(userId, d)
         await showPreview(msg.chat.id, userId, d)
       } else {
-        await bot.sendMessage(msg.chat.id, tr(lang, 'sendPhotoOrSkip'))
+        await bot.sendMessage(msg.chat.id, tr(lang, 'sendPhotoOrSkip'), {
+          reply_markup: { inline_keyboard: [backRow(lang)] },
+        })
       }
       break
 
@@ -929,7 +980,6 @@ async function handleReceipt(msg, fileId, d) {
   const p        = { ...d, userId, username, receiptFileId: fileId, adId }
 
   console.log(`[PAYMENT] User: ${userId} отправил чек`)
-
   updateUserAdStatus(userId, adId, 'reviewing')
 
   const ownerMsg = await bot.sendPhoto(OWNER_ID, fileId, {
@@ -944,10 +994,8 @@ async function handleReceipt(msg, fileId, d) {
   })
 
   pending.set(userId, { ...p, ownerMsgId: ownerMsg.message_id })
-  clearDialog(userId)
-  setDialog(userId, { lang: d.lang })
+  clearDialog(userId); setDialog(userId, { lang: d.lang })
   incStat('total')
-
   await bot.sendMessage(msg.chat.id, tr(d.lang, 'receiptSent'), { parse_mode: 'HTML' })
 }
 
@@ -971,19 +1019,35 @@ bot.on('callback_query', async (query) => {
     return
   }
 
+  // ── ⬅️ Back ─────────────────────────────────────────────────────────────────
+  if (data === 'back') {
+    const d = getDialog(fromId)
+    if (!d) { await bot.answerCallbackQuery(query.id); return }
+
+    // Remove pending ad record if going back from payment page
+    if (d.step === 'waiting_receipt' && d.adId) {
+      removeUserAd(fromId, d.adId)
+      d.adId = undefined; setDialog(fromId, d)
+    }
+
+    await bot.answerCallbackQuery(query.id)
+    await goBack(chatId, fromId)
+    return
+  }
+
   // ── Ad type selection ───────────────────────────────────────────────────────
   if (data.startsWith('menu_')) {
-    const d    = getDialog(fromId)
-    const lang = d?.lang ?? 'uz'
+    const d       = getDialog(fromId)
+    const lang    = d?.lang ?? 'uz'
     const adTypeMap = { menu_sell: 'sell', menu_buy: 'buy', menu_service: 'service' }
-    const adType    = adTypeMap[data]
+    const adType  = adTypeMap[data]
     if (!adType) { await bot.answerCallbackQuery(query.id); return }
 
-    setDialog(fromId, { lang, step: 'category', adType })
+    const history = [...(d?.history ?? []), 'ad_type']
+    setDialog(fromId, { lang, step: 'category', adType, history })
     await bot.answerCallbackQuery(query.id)
     await bot.sendMessage(chatId, tr(lang, 'chooseCategory'), {
-      parse_mode:   'HTML',
-      reply_markup: categoryKeyboard(loadConfig().categories),
+      parse_mode: 'HTML', reply_markup: categoryKeyboard(loadConfig().categories, lang),
     })
     return
   }
@@ -994,21 +1058,20 @@ bot.on('callback_query', async (query) => {
     const cfg = loadConfig()
     if (idx < 0 || idx >= cfg.categories.length) { await bot.answerCallbackQuery(query.id); return }
 
-    const d    = getDialog(fromId)
-    const lang = d?.lang ?? 'uz'
+    const d       = getDialog(fromId)
+    const lang    = d?.lang ?? 'uz'
+    const history = [...(d?.history ?? []), 'category']
 
     console.log(`[CATEGORY] User: ${fromId} выбрал: ${cfg.categories[idx].name}`)
     setDialog(fromId, {
-      lang, step: 'price_confirm',
-      adType: d?.adType ?? 'sell', categoryIdx: idx,
-      name: null, phone: null, description: null,
-      adPhotoFileId: null, conditions: null,
+      lang, step: 'price_confirm', adType: d?.adType ?? 'sell', categoryIdx: idx,
+      name: null, phone: null, description: null, adPhotoFileId: null, conditions: null,
+      history,
     })
     await bot.answerCallbackQuery(query.id)
     const cat = cfg.categories[idx]
     await bot.sendMessage(chatId, buildPriceConfirmText(lang, cat.name, cat.price), {
-      parse_mode:   'HTML',
-      reply_markup: priceConfirmKeyboard(lang),
+      parse_mode: 'HTML', reply_markup: priceConfirmKeyboard(lang),
     })
     return
   }
@@ -1017,14 +1080,13 @@ bot.on('callback_query', async (query) => {
   if (data === 'confirm_price') {
     const d = getDialog(fromId)
     if (!d) { await bot.answerCallbackQuery(query.id); return }
-    d.step = 'name'
-    setDialog(fromId, d)
+    pushHistory(d, 'price_confirm')
     await bot.answerCallbackQuery(query.id)
-    await bot.sendMessage(chatId, tr(d.lang, 'askName'), { parse_mode: 'HTML' })
+    await showStep(chatId, fromId, 'name', d)
     return
   }
 
-  // ── Copy card ───────────────────────────────────────────────────────────────
+  // ── Copy card number ────────────────────────────────────────────────────────
   if (data === 'copy_card') {
     const cardNumber = loadConfig().card_number.replace(/\s/g, '')
     await bot.answerCallbackQuery(query.id)
@@ -1032,7 +1094,7 @@ bot.on('callback_query', async (query) => {
     return
   }
 
-  // ── Preview: confirm ────────────────────────────────────────────────────────
+  // ── Preview: confirm → payment ──────────────────────────────────────────────
   if (data === 'preview_confirm') {
     const d = getDialog(fromId)
     if (!d) { await bot.answerCallbackQuery(query.id); return }
@@ -1042,24 +1104,17 @@ bot.on('callback_query', async (query) => {
     const cat  = cfg.categories[d.categoryIdx]
 
     addUserAd(fromId, {
-      adId,
-      categoryIdx:  d.categoryIdx,
-      categoryName: cat.name,
-      adType:       d.adType,
-      status:       'waiting_payment',
-      createdAt:    new Date().toISOString(),
+      adId, categoryIdx: d.categoryIdx, categoryName: cat.name,
+      adType: d.adType, status: 'waiting_payment', createdAt: new Date().toISOString(),
     })
 
-    d.step  = 'waiting_receipt'
-    d.adId  = adId
+    pushHistory(d, 'preview')
+    d.step = 'waiting_receipt'; d.adId = adId
     setDialog(fromId, d)
 
     await bot.answerCallbackQuery(query.id)
     await bot.sendMessage(chatId, buildPaymentText(d, cfg, d.lang), {
-      parse_mode:   'HTML',
-      reply_markup: {
-        inline_keyboard: [[{ text: tr(d.lang, 'copyCard'), callback_data: 'copy_card' }]],
-      },
+      parse_mode: 'HTML', reply_markup: paymentKeyboard(d.lang),
     })
     return
   }
@@ -1070,13 +1125,12 @@ bot.on('callback_query', async (query) => {
     if (!d) { await bot.answerCallbackQuery(query.id); return }
     await bot.answerCallbackQuery(query.id)
     await bot.sendMessage(chatId, tr(d.lang, 'editTitle'), {
-      parse_mode:   'HTML',
-      reply_markup: editFieldKeyboard(d.lang),
+      parse_mode: 'HTML', reply_markup: editFieldKeyboard(d.lang),
     })
     return
   }
 
-  // ── Preview: cancel ─────────────────────────────────────────────────────────
+  // ── Preview / payment: cancel ───────────────────────────────────────────────
   if (data === 'preview_cancel') {
     const lang = getUserLang(fromId)
     setDialog(fromId, { lang, step: 'idle' })
@@ -1089,6 +1143,7 @@ bot.on('callback_query', async (query) => {
   if (data.startsWith('ef_')) {
     const d = getDialog(fromId)
     if (!d) { await bot.answerCallbackQuery(query.id); return }
+    const lang = d.lang
     const fieldMap = {
       ef_name:  { step: 'edit_name',  ask: 'editAskName'  },
       ef_phone: { step: 'edit_phone', ask: 'editAskPhone' },
@@ -1098,18 +1153,22 @@ bot.on('callback_query', async (query) => {
     }
     const fm = fieldMap[data]
     if (!fm) { await bot.answerCallbackQuery(query.id); return }
-    d.step = fm.step
-    setDialog(fromId, d)
+    d.step = fm.step; setDialog(fromId, d)
     await bot.answerCallbackQuery(query.id)
+    // Edit phone uses reply keyboard with back; all others use inline back button
     if (data === 'ef_phone') {
-      await askPhone(chatId, d.lang)
+      await bot.sendMessage(chatId, tr(lang, fm.ask), {
+        parse_mode: 'HTML', reply_markup: phoneWithBackKeyboard(lang),
+      })
     } else {
-      await bot.sendMessage(chatId, tr(d.lang, fm.ask), { parse_mode: 'HTML' })
+      await bot.sendMessage(chatId, tr(lang, fm.ask), {
+        parse_mode: 'HTML', reply_markup: { inline_keyboard: [backRow(lang)] },
+      })
     }
     return
   }
 
-  // ── Settings callbacks ──────────────────────────────────────────────────────
+  // ── Settings ────────────────────────────────────────────────────────────────
   if (data === 'settings_lang') {
     const lang = getUserLang(fromId)
     setDialog(fromId, { lang, step: 'idle' })
@@ -1123,107 +1182,83 @@ bot.on('callback_query', async (query) => {
     setDialog(fromId, { lang, step: 'settings_phone' })
     await bot.answerCallbackQuery(query.id)
     await bot.sendMessage(chatId, tr(lang, 'askNewPhone'), {
-      parse_mode:   'HTML',
-      reply_markup: phoneKeyboard(lang),
+      parse_mode: 'HTML', reply_markup: phoneWithBackKeyboard(lang),
     })
     return
   }
 
-  // ── Admin panel callbacks ───────────────────────────────────────────────────
+  // ── Admin panel ─────────────────────────────────────────────────────────────
   if (data === 'admin_main') {
     if (fromId !== OWNER_ID) { await bot.answerCallbackQuery(query.id); return }
-    adminState.delete(OWNER_ID)
-    await bot.answerCallbackQuery(query.id)
-    await showAdminMenu(chatId)
-    return
+    adminState.delete(OWNER_ID); await bot.answerCallbackQuery(query.id)
+    await showAdminMenu(chatId); return
   }
 
   if (data === 'admin_card') {
     if (fromId !== OWNER_ID) { await bot.answerCallbackQuery(query.id); return }
-    adminState.set(OWNER_ID, { step: 'card_number' })
-    await bot.answerCallbackQuery(query.id)
-    await bot.sendMessage(chatId, "Yangi karta raqamini yuboring:")
-    return
+    adminState.set(OWNER_ID, { step: 'card_number' }); await bot.answerCallbackQuery(query.id)
+    await bot.sendMessage(chatId, "Yangi karta raqamini yuboring:"); return
   }
 
   if (data === 'admin_prices') {
     if (fromId !== OWNER_ID) { await bot.answerCallbackQuery(query.id); return }
     const cfg     = loadConfig()
     const buttons = cfg.categories.map((cat, i) => [{
-      text: `${i + 1}. ${cat.name} — ${fmt(cat.price)} so'm`, callback_data: `admin_cat_${i}`,
+      text: `${i+1}. ${cat.name} — ${fmt(cat.price)} so'm`, callback_data: `admin_cat_${i}`,
     }])
     buttons.push([{ text: '🔙 Orqaga', callback_data: 'admin_main' }])
     await bot.answerCallbackQuery(query.id)
     await bot.sendMessage(chatId, `💰 <b>Kategoriyalar narxlari:</b>\n${DIV}`, {
-      parse_mode:   'HTML',
-      reply_markup: { inline_keyboard: buttons },
-    })
-    return
+      parse_mode: 'HTML', reply_markup: { inline_keyboard: buttons },
+    }); return
   }
 
   if (data.startsWith('admin_cat_')) {
     if (fromId !== OWNER_ID) { await bot.answerCallbackQuery(query.id); return }
-    const idx = Number(data.slice(10))
-    const cfg = loadConfig()
-    const cat = cfg.categories[idx]
+    const idx = Number(data.slice(10)); const cfg = loadConfig(); const cat = cfg.categories[idx]
     if (!cat) { await bot.answerCallbackQuery(query.id); return }
     adminState.set(OWNER_ID, { step: 'price_input', categoryIdx: idx })
     await bot.answerCallbackQuery(query.id)
     await bot.sendMessage(chatId,
       `<b>${cat.name}</b>\nJoriy narx: <b>${fmt(cat.price)} so'm</b>\n\nYangi narxni yuboring:`,
-      { parse_mode: 'HTML' }
-    )
-    return
+      { parse_mode: 'HTML' }); return
   }
 
   if (data === 'admin_stats') {
     if (fromId !== OWNER_ID) { await bot.answerCallbackQuery(query.id); return }
-    const s = loadStats()
-    await bot.answerCallbackQuery(query.id)
+    const s = loadStats(); await bot.answerCallbackQuery(query.id)
     await bot.sendMessage(chatId, [
-      `📊 <b>Statistika:</b>\n${DIV}`,
-      '',
+      `📊 <b>Statistika:</b>\n${DIV}`, '',
       `✅ Tasdiqlangan: <b>${s.approved}</b> ta`,
       `❌ Rad etilgan: <b>${s.rejected}</b> ta`,
       `⏳ Kutilmoqda: <b>${pending.size}</b> ta`,
-    ].join('\n'), { parse_mode: 'HTML' })
-    return
+    ].join('\n'), { parse_mode: 'HTML' }); return
   }
 
   if (data.startsWith('admin_editprice_')) {
     if (fromId !== OWNER_ID) { await bot.answerCallbackQuery(query.id); return }
-    const idx = Number(data.slice(16))
-    const cfg = loadConfig()
-    const cat = cfg.categories[idx]
+    const idx = Number(data.slice(16)); const cfg = loadConfig(); const cat = cfg.categories[idx]
     if (!cat) { await bot.answerCallbackQuery(query.id); return }
     await bot.answerCallbackQuery(query.id)
     await bot.sendMessage(chatId,
-      `${idx + 1}. <b>${cat.name}</b>\nJoriy narx: <b>${fmt(cat.price)} so'm</b>\n\n` +
-      `Yangi narx:\n<code>/setprice ${idx + 1} YANGI_NARX</code>`,
-      { parse_mode: 'HTML' }
-    )
-    return
+      `${idx+1}. <b>${cat.name}</b>\nJoriy narx: <b>${fmt(cat.price)} so'm</b>\n\n` +
+      `Yangi narx:\n<code>/setprice ${idx+1} YANGI_NARX</code>`, { parse_mode: 'HTML' }); return
   }
 
   // ── Approve ─────────────────────────────────────────────────────────────────
   if (data.startsWith('approve_')) {
     if (fromId !== OWNER_ID) { await bot.answerCallbackQuery(query.id); return }
-    const targetId = Number(data.slice(8))
-    const p        = pending.get(targetId)
+    const targetId = Number(data.slice(8)); const p = pending.get(targetId)
     if (!p) { await bot.answerCallbackQuery(query.id, { text: "Ariza topilmadi (eskirgan)" }); return }
 
     console.log(`[ADMIN] approve User: ${targetId}`)
     await bot.answerCallbackQuery(query.id, { text: '✅ Tasdiqlandi' })
-    pending.delete(targetId)
-    incStat('approved')
-
+    pending.delete(targetId); incStat('approved')
     if (p.adId) updateUserAdStatus(targetId, p.adId, 'approved')
 
     try {
-      const me        = await bot.getMe()
-      const cfg       = loadConfig()
-      const cat       = cfg.categories[p.categoryIdx]
-      const postText  = buildGroupPostText(p, cfg, me.username)
+      const me = await bot.getMe(); const cfg = loadConfig()
+      const cat = cfg.categories[p.categoryIdx]; const postText = buildGroupPostText(p, cfg, me.username)
       const threadOpt = cat.topic_id ? { message_thread_id: Number(cat.topic_id) } : {}
       if (p.adPhotoFileId) {
         await bot.sendPhoto(GROUP_ID, p.adPhotoFileId, { caption: postText, parse_mode: 'HTML', ...threadOpt })
@@ -1231,9 +1266,7 @@ bot.on('callback_query', async (query) => {
         await bot.sendMessage(GROUP_ID, postText, { parse_mode: 'HTML', ...threadOpt })
       }
       console.log(`[PUBLISHED] ${cat.name} topic:${cat.topic_id ?? '-'}`)
-    } catch (err) {
-      console.error(`[ERROR] publish: ${err.message}`)
-    }
+    } catch (err) { console.error(`[ERROR] publish: ${err.message}`) }
 
     try {
       await bot.editMessageCaption(
@@ -1249,15 +1282,12 @@ bot.on('callback_query', async (query) => {
   // ── Reject ──────────────────────────────────────────────────────────────────
   if (data.startsWith('reject_')) {
     if (fromId !== OWNER_ID) { await bot.answerCallbackQuery(query.id); return }
-    const targetId = Number(data.slice(7))
-    const p        = pending.get(targetId)
+    const targetId = Number(data.slice(7)); const p = pending.get(targetId)
     if (!p) { await bot.answerCallbackQuery(query.id, { text: "Ariza topilmadi" }); return }
 
     console.log(`[ADMIN] reject User: ${targetId}`)
     await bot.answerCallbackQuery(query.id, { text: '❌ Rad etildi' })
-    pending.delete(targetId)
-    incStat('rejected')
-
+    pending.delete(targetId); incStat('rejected')
     if (p.adId) updateUserAdStatus(targetId, p.adId, 'rejected')
 
     try {
