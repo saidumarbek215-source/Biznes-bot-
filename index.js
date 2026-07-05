@@ -82,9 +82,9 @@ const T = {
     askPhone:       "📞 <b>Telefon raqamingizni yuboring:</b>",
     phoneBtn:       "📱 Telefon raqamimni yuborish",
     askDescription: "📝 <b>Mahsulot yoki xizmat haqida yozing:</b>",
-    askPhoto:       "🖼 <b>Rasm yuborasizmi?</b>\n<i>/skip — o'tkazib yuborish</i>",
+    askPhoto:       "🖼 <b>Rasmlarni yuboring 📸 (maksimal 10 ta)</b>\n<i>Tugagandan keyin /done yuboring\n/skip — o'tkazib yuborish</i>",
     askPrice:       "💰 <b>Narx yoki shartlar?</b>\n<i>/skip — o'tkazib yuborish</i>",
-    sendPhotoOrSkip:"Rasm yuboring yoki /skip yozing",
+    sendPhotoOrSkip:"Rasm yuboring, /done (tugash) yoki /skip (o'tkazib yuborish)",
 
     previewTitle: "👀 <b>E'loningizni tekshiring:</b>",
     previewCat:   "📂 Kategoriya",
@@ -171,9 +171,9 @@ const T = {
     askPhone:       "📞 <b>Отправьте ваш номер телефона:</b>",
     phoneBtn:       "📱 Отправить мой номер телефона",
     askDescription: "📝 <b>Напишите о товаре или услуге:</b>",
-    askPhoto:       "🖼 <b>Прикрепить фото?</b>\n<i>/skip — пропустить</i>",
+    askPhoto:       "🖼 <b>Отправьте фотографии 📸 (максимум 10)</b>\n<i>После загрузки отправьте /done\n/skip — пропустить</i>",
     askPrice:       "💰 <b>Цена или условия?</b>\n<i>/skip — пропустить</i>",
-    sendPhotoOrSkip:"Отправьте фото или напишите /skip",
+    sendPhotoOrSkip:"Отправьте фото, /done (завершить) или /skip (пропустить)",
 
     previewTitle: "👀 <b>Проверьте объявление:</b>",
     previewCat:   "📂 Категория",
@@ -435,7 +435,7 @@ function buildPreviewText(d, cfg, lang) {
     `${tr(lang, 'previewPhone')}: <code>${d.phone}</code>`,
     `${tr(lang, 'previewDesc')}: ${d.description}`,
     `${tr(lang, 'previewPrice')}: ${d.conditions ?? '—'}`,
-    `${tr(lang, 'previewPhoto')}: ${d.adPhotoFileId ? tr(lang, 'photoYes') : tr(lang, 'photoNo')}`,
+    `${tr(lang, 'previewPhoto')}: ${(d.photos?.length ?? 0) > 0 ? `🖼 Rasmlar: ${d.photos.length} ta` : tr(lang, 'photoNo')}`,
     '', DIV, tr(lang, 'previewQ'),
   ].join('\n')
 }
@@ -495,15 +495,22 @@ async function removeKeyboard(chatId, text) {
 }
 
 async function showPreview(chatId, userId, d) {
-  const cfg  = loadConfig()
-  const lang = d.lang
-  const text = buildPreviewText(d, cfg, lang)
+  const cfg    = loadConfig()
+  const lang   = d.lang
+  const text   = buildPreviewText(d, cfg, lang)
+  const photos = d.photos ?? []
   d.step = 'preview'
   setDialog(userId, d)
-  if (d.adPhotoFileId) {
-    await bot.sendPhoto(chatId, d.adPhotoFileId, {
+  if (photos.length === 1) {
+    await bot.sendPhoto(chatId, photos[0], {
       caption: text, parse_mode: 'HTML', reply_markup: previewKeyboard(lang),
     })
+  } else if (photos.length > 1) {
+    const media = photos.map((fid, i) => ({
+      type: 'photo', media: fid, ...(i === 0 ? { caption: text, parse_mode: 'HTML' } : {}),
+    }))
+    await bot.sendMediaGroup(chatId, media)
+    await bot.sendMessage(chatId, text, { parse_mode: 'HTML', reply_markup: previewKeyboard(lang) })
   } else {
     await bot.sendMessage(chatId, text, { parse_mode: 'HTML', reply_markup: previewKeyboard(lang) })
   }
@@ -600,6 +607,8 @@ async function showStep(chatId, userId, step, d) {
       break
 
     case 'photo':
+      d.photos = []
+      setDialog(userId, d)
       await bot.sendMessage(chatId, tr(lang, 'askPhoto'), {
         parse_mode: 'HTML', reply_markup: { inline_keyboard: [backRow(lang)] },
       })
@@ -837,11 +846,13 @@ bot.on('message', async (msg) => {
     return
   }
 
-  // 3. /skip passes only in valid steps; other commands handled by onText
+  // 3. /skip and /done pass only in valid steps; other commands handled by onText
   if (text.startsWith('/')) {
     const d      = getDialog(userId)
-    const skipOk = d && text === '/skip' &&
-      ['photo', 'price', 'edit_price', 'edit_photo'].includes(d.step)
+    const skipOk = d && (
+      (text === '/skip' && ['photo', 'price', 'edit_price', 'edit_photo'].includes(d.step)) ||
+      (text === '/done' && d.step === 'photo')
+    )
     if (!skipOk) return
   }
 
@@ -874,13 +885,19 @@ bot.on('message', async (msg) => {
   if (msg.photo) {
     const fileId = msg.photo[msg.photo.length - 1].file_id
     if (d.step === 'photo') {
-      d.adPhotoFileId = fileId
-      pushHistory(d, 'photo')
-      await showStep(msg.chat.id, userId, 'price', d)
+      if (!d.photos) d.photos = []
+      if (d.photos.length >= 10) {
+        await bot.sendMessage(msg.chat.id,
+          lang === 'ru' ? "Maksimal 10 ta rasm. /done yuboring" : "Maksimal 10 ta rasm. /done yuboring")
+        return
+      }
+      d.photos.push(fileId)
+      setDialog(userId, d)
+      await bot.sendMessage(msg.chat.id, `✅ Rasm qabul qilindi (${d.photos.length} ta)`)
       return
     }
     if (d.step === 'edit_photo') {
-      d.adPhotoFileId = fileId; setDialog(userId, d)
+      d.photos = [fileId]; setDialog(userId, d)
       await showPreview(msg.chat.id, userId, d); return
     }
     if (d.step === 'waiting_receipt') {
@@ -913,8 +930,8 @@ bot.on('message', async (msg) => {
       break
 
     case 'photo':
-      if (text === '/skip') {
-        d.adPhotoFileId = null
+      if (text === '/skip' || text === '/done') {
+        if (!d.photos) d.photos = []
         pushHistory(d, 'photo')
         await showStep(msg.chat.id, userId, 'price', d)
       } else {
@@ -955,7 +972,7 @@ bot.on('message', async (msg) => {
 
     case 'edit_photo':
       if (text === '/skip') {
-        d.adPhotoFileId = null; setDialog(userId, d)
+        d.photos = []; setDialog(userId, d)
         await showPreview(msg.chat.id, userId, d)
       } else {
         await bot.sendMessage(msg.chat.id, tr(lang, 'sendPhotoOrSkip'), {
@@ -1065,7 +1082,7 @@ bot.on('callback_query', async (query) => {
     console.log(`[CATEGORY] User: ${fromId} выбрал: ${cfg.categories[idx].name}`)
     setDialog(fromId, {
       lang, step: 'price_confirm', adType: d?.adType ?? 'sell', categoryIdx: idx,
-      name: null, phone: null, description: null, adPhotoFileId: null, conditions: null,
+      name: null, phone: null, description: null, photos: [], conditions: null,
       history,
     })
     await bot.answerCallbackQuery(query.id)
@@ -1260,8 +1277,14 @@ bot.on('callback_query', async (query) => {
       const me = await bot.getMe(); const cfg = loadConfig()
       const cat = cfg.categories[p.categoryIdx]; const postText = buildGroupPostText(p, cfg, me.username)
       const threadOpt = cat.topic_id ? { message_thread_id: Number(cat.topic_id) } : {}
-      if (p.adPhotoFileId) {
-        await bot.sendPhoto(GROUP_ID, p.adPhotoFileId, { caption: postText, parse_mode: 'HTML', ...threadOpt })
+      const photos = p.photos ?? []
+      if (photos.length === 1) {
+        await bot.sendPhoto(GROUP_ID, photos[0], { caption: postText, parse_mode: 'HTML', ...threadOpt })
+      } else if (photos.length > 1) {
+        const media = photos.map((fid, i) => ({
+          type: 'photo', media: fid, ...(i === 0 ? { caption: postText, parse_mode: 'HTML' } : {}),
+        }))
+        await bot.sendMediaGroup(GROUP_ID, media, threadOpt)
       } else {
         await bot.sendMessage(GROUP_ID, postText, { parse_mode: 'HTML', ...threadOpt })
       }
